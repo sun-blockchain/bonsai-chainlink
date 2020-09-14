@@ -1,9 +1,9 @@
-const HDWalletProvider = require('@truffle/hdwallet-provider')
-require('dotenv').config()
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+require('dotenv').config();
 
 module.exports = {
   networks: {
-    cldev: {
+    development: {
       host: '127.0.0.1',
       port: 8545,
       network_id: '*',
@@ -15,7 +15,7 @@ module.exports = {
     },
     live: {
       provider: () => {
-        return new HDWalletProvider(process.env.MNEMONIC, process.env.RPC_URL)
+        return new HDWalletProvider(process.env.MNEMONIC, process.env.RPC_URL);
       },
       network_id: '*',
       // ~~Necessary due to https://github.com/trufflesuite/truffle/issues/1971~~
@@ -28,4 +28,4 @@ module.exports = {
       version: '0.6.6',
     },
   },
-}
+};

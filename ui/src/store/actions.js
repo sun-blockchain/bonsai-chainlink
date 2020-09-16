@@ -1,28 +1,27 @@
 import {
-  convertHexToDec,
-  getBalanceIcon,
-  getBalanceBonsaiIcon,
-  getBalanceOxyIcon,
-  mintBonsaiFrom,
+  getBalanceNativeToken,
+  getBalanceERC721,
+  getBalanceERC20,
+  mintERC721From,
   sleep,
   getPlantDict,
   setPlantDict,
 } from 'helpers';
 import { PLANT_STATUS, plantsInitDic } from 'constant';
 
-export const SERVER_CONNECTED = 'SERVER_CONNECTED';
-export const serverConnected = (connected) => async (dispatch) => {
+export const SET_WEB3 = 'SET_WEB3';
+export const setWeb3 = (web3) => async (dispatch) => {
   dispatch({
-    type: SERVER_CONNECTED,
-    connected,
+    type: SET_WEB3,
+    web3,
   });
 };
 
-export const ACTIVATE_CONNECTION = 'ACTIVATE_CONNECTION';
-export const activateConnection = (active) => async (dispatch) => {
+export const SET_ADDRESS = 'SET_ADDRESS';
+export const setAddress = (walletAddress) => (dispatch) => {
   dispatch({
-    type: ACTIVATE_CONNECTION,
-    active,
+    type: SET_ADDRESS,
+    walletAddress,
   });
 };
 
@@ -45,12 +44,14 @@ export const resetAll = () => (dispatch) => {
   });
 };
 
-export const GET_BALANCE_ICX = 'GET_BALANCE_ICX';
-export const getBalanceICX = (address) => async (dispatch) => {
-  const balanceICX = convertHexToDec(await getBalanceIcon(address));
+export const GET_BALANCE_NATIVE_TOKEN = 'GET_BALANCE_NATIVE_TOKEN';
+export const getBalanceNative = (address) => async (dispatch, getState) => {
+  let state = getState();
+  let web3 = state.web3;
+  const balanceNative = await getBalanceNativeToken(web3, address);
   dispatch({
-    type: GET_BALANCE_ICX,
-    balanceICX,
+    type: GET_BALANCE_NATIVE_TOKEN,
+    balanceNative,
   });
 };
 
@@ -58,7 +59,7 @@ export const GET_BALANCE_OXY = 'GET_BALANCE_OXY';
 export const getBalanceOxy = () => async (dispatch, getState) => {
   let state = getState();
   let address = state.walletAddress;
-  var amount = await getBalanceOxyIcon(address);
+  var amount = await getBalanceERC20(address);
   if (amount === -1) {
     amount = 'Try again!';
   }
@@ -68,21 +69,12 @@ export const getBalanceOxy = () => async (dispatch, getState) => {
   });
 };
 
-export const SET_ADDRESS = 'SET_ADDRESS';
-export const setAddress = (walletAddress) => (dispatch) => {
-  localStorage.setItem('address', walletAddress);
-  dispatch({
-    type: SET_ADDRESS,
-    walletAddress,
-  });
-};
-
 export const GET_BALANCE_BONSAI = 'GET_BALANCE_BONSAI';
 export const SET_PLANTS_DICT = 'SET_PLANTS_DICT';
 export const getBalanceBonsai = () => async (dispatch, getState) => {
   let state = getState();
   let address = state.walletAddress;
-  let balanceBonsai = await getBalanceBonsaiIcon(address); //[bonsainames[], bonsaiIds[]]
+  let balanceBonsai = await getBalanceERC721(address); //[bonsainames[], bonsaiIds[]]
   let plantsDict = await getPlantDict(address);
   // if this is first time plants in contract is undefined
   if (plantsDict === undefined) {
@@ -93,18 +85,18 @@ export const getBalanceBonsai = () => async (dispatch, getState) => {
   let plants = JSON.parse(JSON.stringify(plantsDict));
 
   // if not error
-  if (balanceBonsai && balanceBonsai !== -1) {
-    balanceBonsai[0].forEach((name, index) => {
-      var x;
-      // if not found plant.name in plants index return -1
-      if ((x = plants.findIndex((plant) => plant.name === name)) !== -1) {
-        plants[x].plantStatus = PLANT_STATUS.PLANTED;
-        plants[x].id = balanceBonsai[1][index];
-      }
-    });
-  } else {
-    alert('Try again!');
-  }
+  // if (balanceBonsai && balanceBonsai !== -1) {
+  //   balanceBonsai[0].forEach((name, index) => {
+  //     var x;
+  //     // if not found plant.name in plants index return -1
+  //     if ((x = plants.findIndex((plant) => plant.name === name)) !== -1) {
+  //       plants[x].plantStatus = PLANT_STATUS.PLANTED;
+  //       plants[x].id = balanceBonsai[1][index];
+  //     }
+  //   });
+  // } else {
+  //   alert('Try again!');
+  // }
 
   plants = Object.values(plants);
   plants.map((plant, index) => (plant.index = index));
@@ -114,11 +106,11 @@ export const getBalanceBonsai = () => async (dispatch, getState) => {
     plantsDict,
   });
 
-  dispatch({
-    type: GET_BALANCE_BONSAI,
-    plants,
-    balanceBonsai: balanceBonsai[0],
-  });
+  // dispatch({
+  //   type: GET_BALANCE_BONSAI,
+  //   plants,
+  //   balanceBonsai: balanceBonsai[0],
+  // });
 };
 
 export const UPDATE_TOUR_STEP = 'UPDATE_TOUR_STEP';
@@ -176,7 +168,7 @@ export const mintBonsai = (bonsai) => async (dispatch, getState) => {
   let state = getState();
   let address = state.walletAddress;
 
-  mintBonsaiFrom(address, bonsai);
+  mintERC721From(address, bonsai);
   await sleep(5000);
 
   dispatch(getBalanceBonsai());

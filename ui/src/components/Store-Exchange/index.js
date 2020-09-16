@@ -3,7 +3,7 @@ import { Row } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { PLANT_STATUS } from 'constant';
 import Item from 'components/Item';
-import { transferOxytoBuyBonsai } from 'helpers';
+import { transferERC20To } from 'helpers';
 import * as actions from 'store/actions';
 
 import './style.css';
@@ -23,7 +23,7 @@ function Store({ onClose }) {
   const address = useSelector((state) => state.walletAddress);
 
   const handleBuyPlant = (item) => {
-    transferOxytoBuyBonsai(address, item);
+    transferERC20To(address, item);
     dispatch(actions.setFirstPlant(item.index));
     onClose();
   };

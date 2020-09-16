@@ -8,6 +8,7 @@ import { ConnectWallet } from 'connectors/ConnectWallet';
 import AirDrop from 'components/AirDrop';
 import { Modal } from 'antd';
 import { BuyOxy } from 'components/OxyStore';
+import { connectMetamask } from 'connectors';
 
 import './top.css';
 
@@ -17,21 +18,9 @@ function Top() {
   const balanceOxy = useSelector((state) => state.balanceOxy);
   const [openModalBuyOxy, setOpenModalBuyOxy] = useState(false);
 
-  if (localStorage.getItem('address')) {
-    dispatch(actions.setAddress(localStorage.getItem('address')));
-  }
-
   const handleSwitchAccount = () => {
-    // close tour
     dispatch(actions.updateTourStep(100));
-
-    window.dispatchEvent(
-      new CustomEvent('ICONEX_RELAY_REQUEST', {
-        detail: {
-          type: 'REQUEST_ADDRESS',
-        },
-      })
-    );
+    connectMetamask();
   };
 
   return (

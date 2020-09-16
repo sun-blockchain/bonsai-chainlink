@@ -15,68 +15,25 @@ export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export const convertHexToDec = (hex_amount) => {
-  return IconConverter.toNumber(hex_amount);
-};
-
 // get balance native token
-export const getBalanceIcon = async (address) => {
-  return await iconService.getBalance(address).execute();
+export const getBalanceNativeToken = async (web3, address) => {
+  if (web3) {
+    return web3.utils.fromWei(await web3.eth.getBalance(address), 'ether');
+  }
 };
 
 // get balance erc-20
-export const getBalanceOxyIcon = async (address) => {
-  try {
-    const txObj = new IconBuilder.CallBuilder()
-      .from(address)
-      .to(process.env.REACT_APP_ADDRESS_CONTRACT_OXI)
-      .method('balanceOf')
-      .params({
-        _owner: address,
-      })
-      .build();
-
-    let balance = await iconService.call(txObj).execute();
-    balance = parseInt(balance);
-    return balance;
-  } catch (err) {
-    console.log({ err });
-    return -1;
-  }
+export const getBalanceERC20 = async (address) => {
+  // TODO
 };
 
 // get balance erc-721
-export const getBalanceBonsaiIcon = async (address) => {
-  try {
-    const txObjBonsaiNames = new IconBuilder.CallBuilder()
-      .from(address)
-      .to(process.env.REACT_APP_ADDRESS_CONTRACT_BONSAI)
-      .method('getListBonsaiNameByAddress')
-      .params({
-        _address: address,
-      })
-      .build();
-
-    const txObjBonsaiIds = new IconBuilder.CallBuilder()
-      .from(address)
-      .to(process.env.REACT_APP_ADDRESS_CONTRACT_BONSAI)
-      .method('getAllBonsaiOfUser')
-      .params({
-        _address: address,
-      })
-      .build();
-    let bonsaiNames = iconService.call(txObjBonsaiNames).execute();
-    let bonsaiIds = iconService.call(txObjBonsaiIds).execute();
-    return await Promise.all([bonsaiNames, bonsaiIds]);
-  } catch (err) {
-    console.log({ err });
-    // return -1 when error
-    return -1;
-  }
+export const getBalanceERC721 = async (address) => {
+  //TODO
 };
 
 // airdrop 30 oxigen for first-time users play
-export const airDropOxyIcon = async (address) => {
+export const airDropERC20 = async (address) => {
   const wallet = IconWallet.loadPrivateKey(process.env.REACT_APP_PRIVATE_KEY);
 
   try {
@@ -104,7 +61,7 @@ export const airDropOxyIcon = async (address) => {
 };
 
 // transfer oxy to buy bonsai
-export const transferOxytoBuyBonsai = (address, item) => {
+export const transferERC20To = (address, item) => {
   if (address) {
     try {
       const txObj = new IconBuilder.CallTransactionBuilder()
@@ -145,7 +102,7 @@ export const transferOxytoBuyBonsai = (address, item) => {
 };
 
 // mint bonsai after transfer oxy successfully
-export const mintBonsaiFrom = async (address, item) => {
+export const mintERC721From = async (address, item) => {
   try {
     const txObjMintBonsai = new IconBuilder.CallTransactionBuilder()
       .from(process.env.REACT_APP_OWNER)
@@ -233,7 +190,7 @@ export const getRemainingTimeReceiveOxy = async (address) => {
       .build();
 
     let balance = await iconService.call(txObj).execute();
-    console.log(convertHexToDec(balance));
+    console.log(balance);
   } catch (err) {
     console.log({ err });
   }

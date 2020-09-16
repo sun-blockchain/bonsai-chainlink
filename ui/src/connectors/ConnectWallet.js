@@ -13,7 +13,7 @@ export const ConnectWallet = () => {
     const main = async () => {
       if (address) {
         dispatch(actions.getBalanceOxy());
-        dispatch(actions.getBalanceBonsai());
+        // dispatch(actions.getBalanceBonsai());
 
         // request receive Oxygen
         receiveOxygen(address, numBonsai);
@@ -81,7 +81,7 @@ export const ConnectWallet = () => {
             const bonsaiID = await getTransferBonsaiID(payload.result);
             if (bonsaiID) {
               await sleep(5000);
-              dispatch(actions.getBalanceBonsai());
+              // dispatch(actions.getBalanceBonsai());
             }
 
             dispatch(actions.setLoading(false));

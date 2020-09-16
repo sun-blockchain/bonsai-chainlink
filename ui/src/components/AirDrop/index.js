@@ -7,22 +7,21 @@ import * as actions from 'store/actions';
 
 export default function AirDrop() {
   const address = useSelector((state) => state.walletAddress);
+  const web3 = useSelector((state) => state.web3);
+  const instance = useSelector((state) => state.instanceOxygen);
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const main = async () => {
       if (address) {
-        const txHash = await airDropERC20(address);
-
-        if (await isTxSuccess(txHash)) {
-          setVisible(true);
-          // get balance oxy after airdrop
-          dispatch(actions.getBalanceOxy(address));
-        }
-        // if not beginner
-        else localStorage.setItem('noNeedTour', true);
+        await airDropERC20(web3, instance, address);
+        setVisible(true);
+        // get balance oxy after airdrop
+        dispatch(actions.getBalanceOxy(address));
       }
+      // if not beginner
+      else localStorage.setItem('noNeedTour', true);
     };
 
     main();

@@ -14,6 +14,8 @@ const initialState = {
   balanceBonsai: [],
   firstPlant: null, // for trigger transfer plant posotion
   loading: false,
+  instanceBonsai: null,
+  instanceOxygen: null,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -68,6 +70,16 @@ const rootReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: action.loading,
+      };
+    case connect.SET_BONSAI_INSTANCE:
+      return {
+        ...state,
+        instanceBonsai: action.instanceBonsai,
+      };
+    case connect.SET_OXYGEN_INSTANCE:
+      return {
+        ...state,
+        instanceOxygen: action.instanceOxygen,
       };
     default:
       return state;

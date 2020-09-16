@@ -5,7 +5,19 @@
 import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
 import store from 'store';
-import { setWeb3, setAddress } from 'store/actions';
+import {
+  setWeb3,
+  setAddress,
+  setBonsaiInstance,
+  setOxygenInstance,
+  getBalanceBonsai,
+} from 'store/actions';
+
+import Bonsai from 'build/contracts/Bonsai.json';
+import Oxygen from 'build/contracts/Oxygen.json';
+
+const addressBonsai = Bonsai.networks[process.env.REACT_APP_NETWORK_ID].address;
+const addressOxygen = Oxygen.networks[process.env.REACT_APP_NETWORK_ID].address;
 
 // this returns the provider, or null if it wasn't detected
 export const connectMetamask = async () => {
@@ -27,6 +39,11 @@ export const connectMetamask = async () => {
     } else {
       const web3 = new Web3(window.ethereum);
       store.dispatch(setWeb3(web3));
+      const instanceBonsai = new web3.eth.Contract(Bonsai.abi, addressBonsai);
+      const instanceOxygen = new web3.eth.Contract(Oxygen.abi, addressOxygen);
+      store.dispatch(setBonsaiInstance(instanceBonsai));
+      store.dispatch(setOxygenInstance(instanceOxygen));
+
       connect();
     }
   }
@@ -74,6 +91,7 @@ export const connectMetamask = async () => {
       store.dispatch(setAddress(null));
     } else if (accounts[0] !== currentAccount) {
       currentAccount = accounts[0];
+      console.log({ currentAccount });
       store.dispatch(setAddress(currentAccount));
     }
   }

@@ -1,15 +1,14 @@
 import * as connect from './actions';
 
 const initialState = {
-  active: false,
-  connected: false,
+  web3: null,
   account: null,
   purses: [],
   plantsDict: [], // Empty array
   plants: [], // Fill bonsai in empty array to display
   test: [],
   walletAddress: null,
-  balanceICX: null,
+  balanceNative: null,
   balanceOxy: null,
   tourStep: 0,
   balanceBonsai: [],
@@ -19,30 +18,25 @@ const initialState = {
 
 const rootReducer = (state = initialState, action) => {
   switch (action.type) {
-    case connect.SERVER_CONNECTED:
+    case connect.SET_WEB3:
       return {
         ...state,
-        connected: action.connected,
-      };
-    case connect.ACTIVATE_CONNECTION:
-      return {
-        ...state,
-        active: action.active,
-      };
-    case connect.CHANGE_PLANT_STATUS:
-      return {
-        ...state,
-        plants: action.plants,
+        web3: action.web3,
       };
     case connect.SET_ADDRESS:
       return {
         ...state,
         walletAddress: action.walletAddress,
       };
-    case connect.GET_BALANCE_ICX:
+    case connect.CHANGE_PLANT_STATUS:
       return {
         ...state,
-        balanceICX: action.balanceICX,
+        plants: action.plants,
+      };
+    case connect.GET_BALANCE_NATIVE_TOKEN:
+      return {
+        ...state,
+        balanceNative: action.balanceNative,
       };
     case connect.GET_BALANCE_OXY:
       return {

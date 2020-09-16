@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'antd';
 import { CheckCircleTwoTone } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
-import { airDropOxyIcon, isTxSuccess } from 'helpers';
+import { airDropERC20, isTxSuccess } from 'helpers';
 import * as actions from 'store/actions';
 
 export default function AirDrop() {
@@ -13,7 +13,7 @@ export default function AirDrop() {
   useEffect(() => {
     const main = async () => {
       if (address) {
-        const txHash = await airDropOxyIcon(address);
+        const txHash = await airDropERC20(address);
 
         if (await isTxSuccess(txHash)) {
           setVisible(true);

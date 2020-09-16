@@ -36,6 +36,7 @@ export const ConnectWallet = () => {
         };
         init();
       }
+      dispatch(actions.getBalanceNative(address));
     }, 30000);
     return () => clearInterval(interval);
   }, [address, dispatch, numBonsai]);

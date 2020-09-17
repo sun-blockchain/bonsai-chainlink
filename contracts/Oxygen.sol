@@ -47,7 +47,7 @@ contract Oxygen is ERC20, Ownable {
         require(!airDropped[recipient], "This address has air dropped");
         require(balanceOf(recipient) == 0, "This address has already oxygen");
 
-        _mint(recipient, 3000);
+        _mint(recipient, 3000000000000000000000);
         airDropped[recipient] = true;
     }
 

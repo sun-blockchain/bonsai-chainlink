@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import * as actions from 'store/actions';
 import { ConnectWallet } from 'connectors/ConnectWallet';
 import AirDrop from 'components/AirDrop';
-import { Button, Modal } from 'antd';
+import { Modal } from 'antd';
 import { BuyOxy } from 'components/OxyStore';
 import { connectMetamask } from 'connectors';
 

@@ -2,16 +2,17 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 require('dotenv').config();
 
 module.exports = {
+  contracts_build_directory: './ui/src/contracts',
   networks: {
     development: {
       host: '127.0.0.1',
       port: 8545,
-      network_id: '*',
+      network_id: '*'
     },
     ganache: {
       host: '127.0.0.1',
       port: 7545,
-      network_id: '*',
+      network_id: '*'
     },
     live: {
       provider: () => {
@@ -20,7 +21,7 @@ module.exports = {
       network_id: '*',
       // ~~Necessary due to https://github.com/trufflesuite/truffle/issues/1971~~
       // Necessary due to https://github.com/trufflesuite/truffle/issues/3008
-      skipDryRun: true,
+      skipDryRun: true
     },
     ropsten: {
       provider: () => {
@@ -29,12 +30,12 @@ module.exports = {
       network_id: '3',
       // ~~Necessary due to https://github.com/trufflesuite/truffle/issues/1971~~
       // Necessary due to https://github.com/trufflesuite/truffle/issues/3008
-      skipDryRun: true,
-    },
+      skipDryRun: true
+    }
   },
   compilers: {
     solc: {
-      version: '0.6.6',
-    },
-  },
+      version: '0.6.6'
+    }
+  }
 };

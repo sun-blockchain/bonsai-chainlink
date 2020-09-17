@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Tour from 'reactour';
 import { disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
-import { isNewbie } from 'helpers';
+import { airDropped } from 'helpers';
 
 import './index.css';
 
@@ -17,8 +17,8 @@ export default function TourNewbie() {
       if (address === null) {
         setIsTourOpen(true);
       } else {
-        const newbie = await isNewbie(address);
-        if (!newbie) setIsTourOpen(false);
+        const result = await airDropped(address);
+        if (!result) setIsTourOpen(false);
       }
     };
 

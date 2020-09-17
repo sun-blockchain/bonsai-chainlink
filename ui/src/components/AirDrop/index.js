@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'antd';
 import { CheckCircleTwoTone } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
-import { airDropERC20, isTxSuccess } from 'helpers';
+import { airDropERC20, isNewbie } from 'helpers';
 import * as actions from 'store/actions';
 
 export default function AirDrop() {
@@ -15,17 +15,21 @@ export default function AirDrop() {
   useEffect(() => {
     const main = async () => {
       if (address) {
-        await airDropERC20(web3, instance, address);
-        setVisible(true);
-        // get balance oxy after airdrop
-        dispatch(actions.getBalanceOxy(address));
+        let newbie = await isNewbie(address, instance);
+        if (!newbie) {
+          await airDropERC20(web3, instance, address);
+          setVisible(true);
+
+          // get balance oxy after airdrop
+          dispatch(actions.getBalanceOxy(address));
+        }
       }
       // if not beginner
       else localStorage.setItem('noNeedTour', true);
     };
 
     main();
-  }, [address, dispatch]);
+  }, [address, web3, instance, dispatch]);
 
   const handleOk = () => {
     setVisible(false);

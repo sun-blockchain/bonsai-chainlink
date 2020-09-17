@@ -21,10 +21,15 @@ function Store({ onClose }) {
   }, [plants]);
 
   const address = useSelector((state) => state.walletAddress);
+  const instanceOxygen = useSelector((state) => state.instanceOxygen);
 
-  const handleBuyPlant = (item) => {
-    transferERC20To(address, item);
+  const handleBuyPlant = async (item) => {
+    let isSuccess = await transferERC20To(instanceOxygen, address, item.price);
+    if (isSuccess.status) {
+      dispatch(actions.mintBonsai(address, item));
+    }
     dispatch(actions.setFirstPlant(item.index));
+
     onClose();
   };
 

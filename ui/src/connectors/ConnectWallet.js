@@ -1,37 +1,35 @@
 import React, { useEffect } from 'react';
-import { message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import * as actions from 'store/actions';
-import { isTxSuccess, sleep, receiveOxygen, getTransferBonsaiID } from 'helpers';
+import { receiveOxygen } from 'helpers';
 
 export const ConnectWallet = () => {
   const address = useSelector((state) => state.walletAddress);
   const numBonsai = useSelector((state) => state.balanceBonsai.length);
+  const web3 = useSelector((state) => state.web3);
+  const instanceOxygen = useSelector((state) => state.instanceOxygen);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
     const main = async () => {
       if (address) {
         dispatch(actions.getBalanceOxy());
-        // dispatch(actions.getBalanceBonsai());
-
+        dispatch(actions.getBalanceBonsai());
         // request receive Oxygen
-        receiveOxygen(address, numBonsai);
-        await sleep(5000);
-        dispatch(actions.getBalanceOxy());
+        receiveOxygen(web3, instanceOxygen, address, numBonsai);
       }
     };
 
     main();
-  }, [address, numBonsai, dispatch]);
+  }, [address, numBonsai, dispatch, instanceOxygen, web3]);
 
   useEffect(() => {
     // receive Oxygen every interval 30s
     let interval = setInterval(() => {
       if (address && numBonsai > 0) {
         const init = async () => {
-          receiveOxygen(address, numBonsai);
-          await sleep(5000);
+          receiveOxygen(web3, instanceOxygen, address, numBonsai);
           dispatch(actions.getBalanceOxy());
         };
         init();
@@ -39,58 +37,7 @@ export const ConnectWallet = () => {
       dispatch(actions.getBalanceNative(address));
     }, 30000);
     return () => clearInterval(interval);
-  }, [address, dispatch, numBonsai]);
+  }, [address, dispatch, numBonsai, instanceOxygen, web3]);
 
-  const eventHandler = async (event) => {
-    var type = event.detail.type;
-    var payload = event.detail.payload;
-
-    switch (type) {
-      case 'RESPONSE_ADDRESS':
-        dispatch(actions.setAddress(payload));
-        break;
-      case 'RESPONSE_JSON-RPC':
-        if (payload.id === 1) {
-          let bonsai = JSON.parse(localStorage.getItem('BonsaiBuying'));
-          if (bonsai) {
-            localStorage.removeItem('BonsaiBuying');
-            dispatch(actions.setLoading(true));
-            const tx = await isTxSuccess(payload.result);
-            if (tx) {
-              await dispatch(actions.mintBonsai(bonsai));
-              dispatch(actions.getBalanceOxy());
-
-              dispatch(actions.updateTourStep(3));
-            } else {
-              message.error('Transaction Has Failed !', 1.5);
-            }
-            dispatch(actions.setLoading(false));
-          }
-        } else if (payload.id === 2) {
-          dispatch(actions.setLoading(true));
-          if (JSON.parse(localStorage.getItem('buyOxy'))) {
-            localStorage.removeItem('buyOxy');
-            await sleep(5000);
-            dispatch(actions.getBalanceOxy());
-            dispatch(actions.setLoading(false));
-          }
-        } else if (payload.id === 3) {
-          dispatch(actions.setLoading(true));
-          if (JSON.parse(localStorage.getItem('transferBonsai'))) {
-            localStorage.removeItem('transferBonsai');
-            const bonsaiID = await getTransferBonsaiID(payload.result);
-            if (bonsaiID) {
-              await sleep(5000);
-              // dispatch(actions.getBalanceBonsai());
-            }
-
-            dispatch(actions.setLoading(false));
-          }
-        }
-        break;
-      default:
-    }
-  };
-  window.addEventListener('ICONEX_RELAY_RESPONSE', eventHandler, false);
   return <></>;
 };

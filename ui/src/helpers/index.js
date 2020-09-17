@@ -1,15 +1,7 @@
-import IconService, {
-  HttpProvider,
-  IconWallet,
-  SignedTransaction,
-  IconConverter,
-  IconBuilder,
-  IconAmount,
-} from 'icon-sdk-js';
+import IconService, { HttpProvider, IconBuilder } from 'icon-sdk-js';
 
 const provider = new HttpProvider(process.env.REACT_APP_API_ENPOINT);
 const iconService = new IconService(provider);
-const wallet = IconWallet.loadPrivateKey(process.env.REACT_APP_PRIVATE_KEY);
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -64,16 +56,18 @@ export const airDropERC20 = async (web3, instanceOxygen, address) => {
 };
 
 // transfer oxy to buy bonsai
-export const transferERC20To = (instanceOxygen, address, amount) => {
+export const transferERC20To = async (instanceOxygen, address, amount) => {
   try {
-    instanceOxygen.methods.transfer(address, amount).send();
+    return await instanceOxygen.methods
+      .transfer(process.env.REACT_APP_OWNER_ADDRESS, amount)
+      .send({ from: address });
   } catch (err) {
     console.log({ err });
   }
 };
 
 // mint bonsai after transfer oxy successfully
-export const mintERC721From = async (web3, instanceBonsai, address, item) => {
+export const mintERC721To = async (web3, instanceBonsai, address, item) => {
   const owner = process.env.REACT_APP_OWNER_ADDRESS;
   const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
   try {
@@ -81,6 +75,7 @@ export const mintERC721From = async (web3, instanceBonsai, address, item) => {
       privateKey: privateKeyOwner,
       address: owner,
     });
+    console.log({ item });
     instanceBonsai.methods
       .mint(address, item.name, item.price)
       .send({ from: owner, gas: 400000 })
@@ -105,9 +100,9 @@ export const isTxSuccess = (txHash) => {
 };
 
 // is newbie
-export const isNewbie = async (instanceOxygen) => {
+export const isNewbie = async (address, instanceOxygen) => {
   try {
-    const result = await instanceOxygen.methods.airDropped().call();
+    const result = await instanceOxygen.methods.airDropped(address).call();
     return result;
   } catch (err) {
     console.log({ err });
@@ -170,13 +165,13 @@ export const transferBonsai = (instanceBonsai, from, to, bonsaiId) => {
 // get Plant Dict from contract
 export const getPlantDict = async (instanceBonsai, address) => {
   try {
-    const result = await instanceBonsai.methods.getPlantsByOwner(address).call();
+    const result = await instanceBonsai.methods.plantDict(address).call();
     return result;
   } catch (err) {}
 };
 
 // set Plant Dict
-export const setPlantDict = async (web3, instanceBonsai, plants, address) => {
+export const setPlantDict = async (web3, instanceBonsai, plantsDict, address) => {
   const owner = process.env.REACT_APP_OWNER_ADDRESS;
   const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
   try {
@@ -185,10 +180,11 @@ export const setPlantDict = async (web3, instanceBonsai, plants, address) => {
       address: owner,
     });
     instanceBonsai.methods
-      .setPlantDict(plants, address)
-      .send({ from: owner, gas: 400000 })
+      .setPlantDict(JSON.stringify(plantsDict), address)
+      .send({ from: owner, gas: 1465000 })
       .then(function (receipt) {
         web3.eth.accounts.wallet.remove(owner);
+        console.log({ receipt });
         return receipt;
       });
   } catch (err) {

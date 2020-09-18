@@ -10,8 +10,8 @@ contract Oxygen is ERC20, Ownable {
     AggregatorV3Interface internal priceFeed;
     using SafeMath for uint256;
     
-    mapping (address => uint256) private _lastTimeReceiveOxygen;
-    mapping (address => bool) private _airDropped;
+    mapping (address => uint256) public lastTimeReceiveOxygen;
+    mapping (address => bool) public airDropped;
 
     uint256 public amountOxygenReceiveOneTime;
     uint256 public scopeTimeReceiveOxygen;
@@ -44,18 +44,18 @@ contract Oxygen is ERC20, Ownable {
     }
 
     function airDrop(address recipient) public onlyOwner {
-        require(!_airDropped[recipient], "This address has air dropped");
+        require(!airDropped[recipient], "This address has air dropped");
         require(balanceOf(recipient) == 0, "This address has already oxygen");
 
-        _mint(recipient, 3000);
-        _airDropped[recipient] = true;
+        _mint(recipient, 3000000000000000000000);
+        airDropped[recipient] = true;
     }
 
     function receiveOxygen(address recipient, uint256 numberOfBonsai) public onlyOwner {
-        uint256 lastTimeReceive = _lastTimeReceiveOxygen[recipient];
+        uint256 lastTimeReceive = lastTimeReceiveOxygen[recipient];
 
         if (lastTimeReceive == 0) {
-            _lastTimeReceiveOxygen[recipient] = now;
+            lastTimeReceiveOxygen[recipient] = now;
             return;
         }
        
@@ -66,7 +66,7 @@ contract Oxygen is ERC20, Ownable {
         uint256 totalReceive = timesReceive.mul(amountOxygenReceiveOneTime.mul(numberOfBonsai));
 
         _mint(recipient, totalReceive);
-        _lastTimeReceiveOxygen[recipient] = _lastTimeReceiveOxygen[recipient].add(scopeTimeReceiveOxygen.mul(timesReceive));
+        lastTimeReceiveOxygen[recipient] = lastTimeReceiveOxygen[recipient].add(scopeTimeReceiveOxygen.mul(timesReceive));
     }
 
     function buyOxygen() public payable {
@@ -95,6 +95,6 @@ contract Oxygen is ERC20, Ownable {
     }
     
      function getWaitingTimeOfUser(address user) public view returns (uint256){
-        return now.sub(_lastTimeReceiveOxygen[user]);
+        return now.sub(lastTimeReceiveOxygen[user]);
     }
 }

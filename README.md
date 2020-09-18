@@ -2,10 +2,6 @@
 
 Implementation of a [Chainlink requesting contract](https://docs.chain.link/docs/create-a-chainlinked-project).
 
-## Requirements
-
-- NPM
-
 ## Installation
 
 Package installation should have occurred for you during the Truffle Box setup. However, if you add dependencies, you'll need to add them to the project by running:

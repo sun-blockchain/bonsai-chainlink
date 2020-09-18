@@ -2,8 +2,7 @@ import {
   getBalanceNativeToken,
   getBalanceERC721,
   getBalanceERC20,
-  mintERC721From,
-  sleep,
+  mintERC721To,
   getPlantDict,
   setPlantDict,
 } from 'helpers';
@@ -14,6 +13,22 @@ export const setWeb3 = (web3) => async (dispatch) => {
   dispatch({
     type: SET_WEB3,
     web3,
+  });
+};
+
+export const SET_BONSAI_INSTANCE = 'SET_BONSAI_INSTANCE';
+export const setBonsaiInstance = (instanceBonsai) => async (dispatch) => {
+  dispatch({
+    type: SET_BONSAI_INSTANCE,
+    instanceBonsai,
+  });
+};
+
+export const SET_OXYGEN_INSTANCE = 'SET_OXYGEN_INSTANCE';
+export const setOxygenInstance = (instanceOxygen) => async (dispatch) => {
+  dispatch({
+    type: SET_OXYGEN_INSTANCE,
+    instanceOxygen,
   });
 };
 
@@ -59,23 +74,23 @@ export const GET_BALANCE_OXY = 'GET_BALANCE_OXY';
 export const getBalanceOxy = () => async (dispatch, getState) => {
   let state = getState();
   let address = state.walletAddress;
-  var amount = await getBalanceERC20(address);
-  if (amount === -1) {
-    amount = 'Try again!';
-  }
+  const instanceOxygen = state.instanceOxygen;
+  const amount = await getBalanceERC20(address, instanceOxygen);
   dispatch({
     type: GET_BALANCE_OXY,
     balanceOxy: amount,
   });
 };
 
-export const GET_BALANCE_BONSAI = 'GET_BALANCE_BONSAI';
 export const SET_PLANTS_DICT = 'SET_PLANTS_DICT';
+export const GET_BALANCE_BONSAI = 'GET_BALANCE_BONSAI';
 export const getBalanceBonsai = () => async (dispatch, getState) => {
   let state = getState();
-  let address = state.walletAddress;
-  let balanceBonsai = await getBalanceERC721(address); //[bonsainames[], bonsaiIds[]]
-  let plantsDict = await getPlantDict(address);
+  const address = state.walletAddress;
+  const instanceBonsai = state.instanceBonsai;
+  const balanceBonsai = await getBalanceERC721(address, instanceBonsai);
+  let plantsDict = await getPlantDict(instanceBonsai, address);
+  plantsDict = plantsDict ? JSON.parse(plantsDict) : undefined;
   // if this is first time plants in contract is undefined
   if (plantsDict === undefined) {
     plantsDict = JSON.parse(JSON.stringify(plantsInitDic));
@@ -85,18 +100,18 @@ export const getBalanceBonsai = () => async (dispatch, getState) => {
   let plants = JSON.parse(JSON.stringify(plantsDict));
 
   // if not error
-  // if (balanceBonsai && balanceBonsai !== -1) {
-  //   balanceBonsai[0].forEach((name, index) => {
-  //     var x;
-  //     // if not found plant.name in plants index return -1
-  //     if ((x = plants.findIndex((plant) => plant.name === name)) !== -1) {
-  //       plants[x].plantStatus = PLANT_STATUS.PLANTED;
-  //       plants[x].id = balanceBonsai[1][index];
-  //     }
-  //   });
-  // } else {
-  //   alert('Try again!');
-  // }
+  if (balanceBonsai) {
+    balanceBonsai.forEach((name, index) => {
+      var x;
+      // if not found plant.name in plants index return -1
+      if ((x = plants.findIndex((plant) => plant.name === name['name'])) !== -1) {
+        plants[x].plantStatus = PLANT_STATUS.PLANTED;
+        plants[x].id = balanceBonsai[1][index];
+      }
+    });
+  } else {
+    alert('Try again!');
+  }
 
   plants = Object.values(plants);
   plants.map((plant, index) => (plant.index = index));
@@ -106,11 +121,11 @@ export const getBalanceBonsai = () => async (dispatch, getState) => {
     plantsDict,
   });
 
-  // dispatch({
-  //   type: GET_BALANCE_BONSAI,
-  //   plants,
-  //   balanceBonsai: balanceBonsai[0],
-  // });
+  dispatch({
+    type: GET_BALANCE_BONSAI,
+    plants,
+    balanceBonsai: balanceBonsai,
+  });
 };
 
 export const UPDATE_TOUR_STEP = 'UPDATE_TOUR_STEP';
@@ -136,6 +151,8 @@ export const transferPlantLocation = (secondPlant) => async (dispatch, getState)
   let plantsDict = state.plantsDict;
   let plants = state.plants;
   let address = state.walletAddress;
+  let web3 = state.web3;
+  let instanceBonsai = state.instanceBonsai;
 
   // transfer in empty array
   let temp = plants[firstPlant];
@@ -156,7 +173,7 @@ export const transferPlantLocation = (secondPlant) => async (dispatch, getState)
 
   // update index
   plantsDict.map((plant, index) => (plant.index = index));
-  await setPlantDict(plantsDict, address);
+  await setPlantDict(web3, instanceBonsai, plantsDict, address);
 
   dispatch({
     type: SET_PLANTS_DICT,
@@ -164,12 +181,11 @@ export const transferPlantLocation = (secondPlant) => async (dispatch, getState)
   });
 };
 
-export const mintBonsai = (bonsai) => async (dispatch, getState) => {
+export const mintBonsai = (address, bonsai) => async (dispatch, getState) => {
   let state = getState();
-  let address = state.walletAddress;
-
-  mintERC721From(address, bonsai);
-  await sleep(5000);
+  let web3 = state.web3;
+  const instanceBonsai = state.instanceBonsai;
+  mintERC721To(web3, instanceBonsai, address, bonsai);
 
   dispatch(getBalanceBonsai());
 };

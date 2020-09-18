@@ -15,7 +15,6 @@ contract Oxygen is ERC20, Ownable {
 
     uint256 public amountOxygenReceiveOneTime;
     uint256 public scopeTimeReceiveOxygen;
-    uint256 public ethPrice;
     
     constructor(address oracle, uint256 amountOxygen, uint256 scopeTime) public ERC20("Oxygen", "OX") {
         priceFeed = AggregatorV3Interface(oracle); 
@@ -23,7 +22,7 @@ contract Oxygen is ERC20, Ownable {
         scopeTimeReceiveOxygen = scopeTime;
     }
 
-    function getLatestPrice() public returns (int) {
+    function getLatestPrice() public view returns (int) {
         (
             uint80 roundID, 
             int price,
@@ -33,14 +32,7 @@ contract Oxygen is ERC20, Ownable {
         ) = priceFeed.latestRoundData();
         // If the round is not complete yet, timestamp is 0
         require(timeStamp > 0, "Round not complete");
-        ethPrice = uint256(price);
         return price;
-    }
-
-    function dollarToWei(uint256 amount) public view returns (uint256)  {
-        uint256 result = amount.mul(10 ** 18).div(ethPrice);
-        result = result.mul(100000000);
-        return result;
     }
 
     function airDrop(address recipient) public onlyOwner {
@@ -71,19 +63,19 @@ contract Oxygen is ERC20, Ownable {
 
     function buyOxygen() public payable {
         require(msg.value > 0, "Amount can not less than zero");
+        uint256 priceUnit = uint256(getLatestPrice());
+        uint256 amountOxygen = 0;
 
-        uint amountOxygen = 0;
-
-        if (msg.value == dollarToWei(1)) {
-            amountOxygen = 1000;
+        if (msg.value == priceUnit) {
+            amountOxygen = 1000000000000000000000;
         }
 
-        if (msg.value == dollarToWei(5)) {
-            amountOxygen = 10000;
+        if (msg.value == priceUnit.mul(5)) {
+            amountOxygen = 10000000000000000000000;
         }
 
-        if (msg.value == dollarToWei(10)) {
-            amountOxygen = 100000;
+        if (msg.value == priceUnit.mul(10)) {
+            amountOxygen = 100000000000000000000000;
         }
 
         _mint(msg.sender, amountOxygen);

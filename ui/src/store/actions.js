@@ -89,6 +89,7 @@ export const getBalanceBonsai = () => async (dispatch, getState) => {
   const address = state.walletAddress;
   const instanceBonsai = state.instanceBonsai;
   const balanceBonsai = await getBalanceERC721(address, instanceBonsai);
+  console.log({ balanceBonsai });
   let plantsDict = await getPlantDict(instanceBonsai, address);
   plantsDict = plantsDict ? JSON.parse(plantsDict) : undefined;
   // if this is first time plants in contract is undefined
@@ -106,7 +107,7 @@ export const getBalanceBonsai = () => async (dispatch, getState) => {
       // if not found plant.name in plants index return -1
       if ((x = plants.findIndex((plant) => plant.name === name['name'])) !== -1) {
         plants[x].plantStatus = PLANT_STATUS.PLANTED;
-        plants[x].id = balanceBonsai[1][index];
+        plants[x].id = balanceBonsai[index]['id'];
       }
     });
   } else {
@@ -185,9 +186,10 @@ export const mintBonsai = (address, bonsai) => async (dispatch, getState) => {
   let state = getState();
   let web3 = state.web3;
   const instanceBonsai = state.instanceBonsai;
-  mintERC721To(web3, instanceBonsai, address, bonsai);
+  await mintERC721To(web3, instanceBonsai, address, bonsai);
 
   dispatch(getBalanceBonsai());
+  dispatch(setLoading(false));
 };
 
 export const SET_LOADING = 'SET_LOADING';

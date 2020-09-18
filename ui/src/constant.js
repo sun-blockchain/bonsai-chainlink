@@ -115,13 +115,13 @@ const packageOxyForSale = [
   },
   {
     name: 'Silver Package',
-    price: 9,
+    price: 5,
     oxy: 10000,
     plantImg: 'images/10000oxy.png',
   },
   {
     name: 'Gold Package',
-    price: 80,
+    price: 10,
     oxy: 100000,
     plantImg: 'images/100000oxy.png',
   },

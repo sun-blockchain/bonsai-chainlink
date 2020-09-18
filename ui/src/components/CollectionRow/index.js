@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Button, Input } from 'antd';
+import { Row, Button, Input, message } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import './style.css';
 import { transferBonsai } from 'helpers';
@@ -9,20 +9,32 @@ import * as actions from 'store/actions';
 export const CollectionRow = ({ onCloseCollection, item }) => {
   const dispatch = useDispatch();
 
-  const address = useSelector((state) => state.walletAddress);
+  const from = useSelector((state) => state.walletAddress);
+  const instance = useSelector((state) => state.instanceBonsai);
   const [showInput, setShowInput] = useState(false);
   const [input, setInput] = useState(null);
 
-  const handleTransfer = (bonsaiId) => {
+  const handleTransfer = async (bonsaiId) => {
     if (!input) {
       setShowInput(!showInput);
       return;
     }
-    transferBonsai(address, input, bonsaiId);
 
     setShowInput(!showInput);
     setInput(null);
     onCloseCollection();
+    dispatch(actions.setLoading(true));
+    const resultTx = await transferBonsai(instance, from, input, bonsaiId);
+    dispatch(actions.getBalanceBonsai());
+    dispatch(actions.setLoading(false));
+
+    if (resultTx) {
+      if (resultTx.status) {
+        message.success({ content: 'Transfer Bonsai Successfully !', onClose: 1000 });
+      } else {
+        message.error({ content: 'Transfer Bonsai Has Failed !', onClose: 1000 });
+      }
+    }
   };
 
   const handleInputChange = (event) => {

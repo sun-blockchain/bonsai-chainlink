@@ -20,6 +20,7 @@ export const getBalanceERC20 = async (address, instanceOxygen) => {
   try {
     let result = await instanceOxygen.methods.balanceOf(address).call();
     result /= 1000000000000000000;
+    result = Math.floor(result);
     return result;
   } catch (error) {
     console.log(error);
@@ -47,8 +48,9 @@ export const airDropERC20 = async (web3, instanceOxygen, address) => {
     });
     instanceOxygen.methods
       .airDrop(address)
-      .send({ from: owner, gas: 600000 })
+      .send({ from: owner, gas: 300000 })
       .then(function (receipt) {
+        console.log({ receipt });
         web3.eth.accounts.wallet.remove(owner);
         return receipt;
       });
@@ -66,7 +68,7 @@ export const transferERC20To = async (instanceOxygen, address, amount) => {
       .transfer(process.env.REACT_APP_OWNER_ADDRESS, amount)
       .send({ from: address });
   } catch (err) {
-    console.log({ err });
+    return err;
   }
 };
 
@@ -79,10 +81,10 @@ export const mintERC721To = async (web3, instanceBonsai, address, item) => {
       privateKey: privateKeyOwner,
       address: owner,
     });
-    console.log({ item });
+
     instanceBonsai.methods
       .mint(address, item.name, item.price)
-      .send({ from: owner, gas: 600000 })
+      .send({ from: owner, gas: 300000 })
       .then(function (receipt) {
         web3.eth.accounts.wallet.remove(owner);
         return receipt;
@@ -151,16 +153,22 @@ export const getRemainingTimeReceiveOxy = async (address) => {
   }
 };
 
-export const buyOxygenWithICX = (instanceOxygen, address, numOxy) => {
+export const buyOxygen = async (instanceOxygen, address, amount) => {
   try {
+    let price = await instanceOxygen.methods.getLatestPrice().call();
+    price = new BigNumber(price);
+    amount = price.multipliedBy(amount);
+    const result = await instanceOxygen.methods.buyOxygen().send({ from: address, value: amount });
+    return result;
   } catch (err) {
-    console.log({ err });
+    return err;
   }
 };
 
-export const transferBonsai = (instanceBonsai, from, to, bonsaiId) => {
+export const transferBonsai = async (instanceBonsai, from, to, bonsaiId) => {
   try {
-    instanceBonsai.methods.safeTransferFrom(from, to, bonsaiId).send();
+    const result = await instanceBonsai.methods.safeTransferFrom(from, to, bonsaiId).send({ from });
+    return result;
   } catch (err) {
     console.log({ err });
   }

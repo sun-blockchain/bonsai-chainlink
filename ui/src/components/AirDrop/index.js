@@ -16,7 +16,6 @@ export default function AirDrop() {
     const main = async () => {
       if (address) {
         let result = await airDropped(address, instance);
-        console.log({ result });
         if (!result) {
           await airDropERC20(web3, instance, address);
           setVisible(true);

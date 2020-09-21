@@ -18,6 +18,7 @@ export const BuyOxy = ({ onClose }) => {
     if (resultTx) {
       if (resultTx.status) {
         message.success({ content: 'Buy Oxygen Successfully !', onClose: 1000 });
+        dispatch(actions.getBalanceOxy());
       } else {
         message.error({ content: 'Buy Oxygen Has Failed !', onClose: 1000 });
       }

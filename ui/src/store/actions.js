@@ -89,7 +89,6 @@ export const getBalanceBonsai = () => async (dispatch, getState) => {
   const address = state.walletAddress;
   const instanceBonsai = state.instanceBonsai;
   const balanceBonsai = await getBalanceERC721(address, instanceBonsai);
-  console.log({ balanceBonsai });
   let plantsDict = await getPlantDict(instanceBonsai, address);
   plantsDict = plantsDict ? JSON.parse(plantsDict) : undefined;
   // if this is first time plants in contract is undefined
@@ -188,7 +187,6 @@ export const mintBonsai = (address, bonsai) => async (dispatch, getState) => {
   const instanceBonsai = state.instanceBonsai;
   await mintERC721To(web3, instanceBonsai, address, bonsai);
 
-  dispatch(getBalanceBonsai());
   dispatch(setLoading(false));
 };
 

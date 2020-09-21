@@ -5,29 +5,32 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 
-
 contract Oxygen is ERC20, Ownable {
     AggregatorV3Interface internal priceFeed;
     using SafeMath for uint256;
-    
-    mapping (address => uint256) public lastTimeReceiveOxygen;
-    mapping (address => bool) public airDropped;
+
+    mapping(address => uint256) public lastTimeReceiveOxygen;
+    mapping(address => bool) public airDropped;
 
     uint256 public amountOxygenReceiveOneTime;
     uint256 public scopeTimeReceiveOxygen;
-    
-    constructor(address oracle, uint256 amountOxygen, uint256 scopeTime) public ERC20("Oxygen", "OX") {
-        priceFeed = AggregatorV3Interface(oracle); 
+
+    constructor(
+        address oracle,
+        uint256 amountOxygen,
+        uint256 scopeTime
+    ) public ERC20("Oxygen", "OX") {
+        priceFeed = AggregatorV3Interface(oracle);
         amountOxygenReceiveOneTime = amountOxygen;
         scopeTimeReceiveOxygen = scopeTime;
     }
 
-    function getLatestPrice() public view returns (int) {
+    function getLatestPrice() public view returns (int256) {
         (
-            uint80 roundID, 
-            int price,
-            uint startedAt,
-            uint timeStamp,
+            uint80 roundID,
+            int256 price,
+            uint256 startedAt,
+            uint256 timeStamp,
             uint80 answeredInRound
         ) = priceFeed.latestRoundData();
         // If the round is not complete yet, timestamp is 0
@@ -43,22 +46,32 @@ contract Oxygen is ERC20, Ownable {
         airDropped[recipient] = true;
     }
 
-    function receiveOxygen(address recipient, uint256 numberOfBonsai) public onlyOwner {
+    function receiveOxygen(address recipient, uint256 numberOfBonsai)
+        public
+        onlyOwner
+    {
         uint256 lastTimeReceive = lastTimeReceiveOxygen[recipient];
 
         if (lastTimeReceive == 0) {
             lastTimeReceiveOxygen[recipient] = now;
             return;
         }
-       
+
         uint256 waitingTime = now.sub(lastTimeReceive);
-        require(waitingTime > scopeTimeReceiveOxygen, "Not enough time to receive Oxy");
+        require(
+            waitingTime > scopeTimeReceiveOxygen,
+            "Not enough time to receive Oxy"
+        );
 
         uint256 timesReceive = waitingTime.div(scopeTimeReceiveOxygen);
-        uint256 totalReceive = timesReceive.mul(amountOxygenReceiveOneTime.mul(numberOfBonsai));
+        uint256 totalReceive = timesReceive.mul(
+            amountOxygenReceiveOneTime.mul(numberOfBonsai)
+        );
 
         _mint(recipient, totalReceive);
-        lastTimeReceiveOxygen[recipient] = lastTimeReceiveOxygen[recipient].add(scopeTimeReceiveOxygen.mul(timesReceive));
+        lastTimeReceiveOxygen[recipient] = lastTimeReceiveOxygen[recipient].add(
+            scopeTimeReceiveOxygen.mul(timesReceive)
+        );
     }
 
     function buyOxygen() public payable {
@@ -68,25 +81,24 @@ contract Oxygen is ERC20, Ownable {
 
         if (msg.value == priceUnit) {
             amountOxygen = 1000000000000000000000;
-        }
-
-        if (msg.value == priceUnit.mul(5)) {
+        } else if (msg.value == priceUnit.mul(5)) {
             amountOxygen = 10000000000000000000000;
-        }
-
-        if (msg.value == priceUnit.mul(10)) {
+        } else if (msg.value == priceUnit.mul(10)) {
             amountOxygen = 100000000000000000000000;
         }
-
+        airDropped[msg.sender] = true;
         _mint(msg.sender, amountOxygen);
     }
 
-    function withDrawEther(uint value) public onlyOwner {
-        require(value > 0 && value <= address(this).balance, "Value out of range");
+    function withdrawEther(uint256 value) public onlyOwner {
+        require(
+            value > 0 && value <= address(this).balance,
+            "Value out of range"
+        );
         msg.sender.transfer(value);
     }
-    
-     function getWaitingTimeOfUser(address user) public view returns (uint256){
+
+    function getWaitingTimeOfUser(address user) public view returns (uint256) {
         return now.sub(lastTimeReceiveOxygen[user]);
     }
 }

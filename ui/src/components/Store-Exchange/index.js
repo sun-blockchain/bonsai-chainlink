@@ -29,8 +29,8 @@ function Store({ onClose }) {
     let resultTx = await transferERC20To(instanceOxygen, address, item.price);
     if (resultTx) {
       if (resultTx.status) {
-        await dispatch(actions.mintBonsai(address, item));
-        await dispatch(actions.setFirstPlant(item.index));
+        dispatch(actions.mintBonsai(address, item));
+        dispatch(actions.setFirstPlant(item.index));
         message.success({ content: 'Buy Bonsai Successfully !', onClose: 2000 });
       } else {
         message.error({ content: 'Buy Bonsai Has Failed !', onClose: 2000 });

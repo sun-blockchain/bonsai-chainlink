@@ -50,7 +50,6 @@ export const airDropERC20 = async (web3, instanceOxygen, address) => {
       .airDrop(address)
       .send({ from: owner, gas: 300000 })
       .then(function (receipt) {
-        console.log({ receipt });
         web3.eth.accounts.wallet.remove(owner);
         return receipt;
       });
@@ -135,24 +134,6 @@ export const receiveOxygen = async (web3, instanceOxygen, address, numBonsais) =
   }
 };
 
-export const getRemainingTimeReceiveOxy = async (address) => {
-  try {
-    const txObj = new IconBuilder.CallBuilder()
-      .from(address)
-      .to(process.env.REACT_APP_ADDRESS_CONTRACT_OXI)
-      .method('timeToNextReceiveOxy')
-      .params({
-        _address: address,
-      })
-      .build();
-
-    let balance = await iconService.call(txObj).execute();
-    console.log(balance);
-  } catch (err) {
-    console.log({ err });
-  }
-};
-
 export const buyOxygen = async (instanceOxygen, address, amount) => {
   try {
     let price = await instanceOxygen.methods.getLatestPrice().call();
@@ -196,7 +177,6 @@ export const setPlantDict = async (web3, instanceBonsai, plantsDict, address) =>
       .send({ from: owner, gas: 1465000 })
       .then(function (receipt) {
         web3.eth.accounts.wallet.remove(owner);
-        console.log({ receipt });
         return receipt;
       });
   } catch (err) {

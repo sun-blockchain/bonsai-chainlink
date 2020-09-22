@@ -73,9 +73,8 @@ export const getBalanceNative = (address) => async (dispatch, getState) => {
 export const GET_BALANCE_OXY = 'GET_BALANCE_OXY';
 export const getBalanceOxy = () => async (dispatch, getState) => {
   let state = getState();
-  let address = state.walletAddress;
-  const instanceOxygen = state.instanceOxygen;
-  const amount = await getBalanceERC20(address, instanceOxygen);
+
+  const amount = await getBalanceERC20(state);
   dispatch({
     type: GET_BALANCE_OXY,
     balanceOxy: amount,

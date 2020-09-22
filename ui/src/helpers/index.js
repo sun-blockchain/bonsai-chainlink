@@ -1,8 +1,4 @@
-import IconService, { HttpProvider, IconBuilder } from 'icon-sdk-js';
 import BigNumber from 'bignumber.js';
-
-const provider = new HttpProvider(process.env.REACT_APP_API_ENPOINT);
-const iconService = new IconService(provider);
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,11 +12,10 @@ export const getBalanceNativeToken = async (web3, address) => {
 };
 
 // get balance erc-20
-export const getBalanceERC20 = async (address, instanceOxygen) => {
+export const getBalanceERC20 = async (state) => {
   try {
-    let result = await instanceOxygen.methods.balanceOf(address).call();
-    result /= 1000000000000000000;
-    result = Math.floor(result);
+    let result = await state.instanceOxygen.methods.balanceOf(state.walletAddress).call();
+    result = state.web3.utils.fromWei(result, 'ether');
     return result;
   } catch (error) {
     console.log(error);
@@ -91,17 +86,6 @@ export const mintERC721To = async (web3, instanceBonsai, address, item) => {
   } catch (err) {
     console.log({ err });
   }
-};
-
-// get transaction result success or not
-export const isTxSuccess = (txHash) => {
-  return new Promise(async (resolve, reject) => {
-    await sleep(5000);
-    const txObject = await iconService.getTransactionResult(txHash).execute();
-    if (txObject['status'] === 1) {
-      resolve(true);
-    } else return resolve(false);
-  });
 };
 
 // is newbie
@@ -182,16 +166,4 @@ export const setPlantDict = async (web3, instanceBonsai, plantsDict, address) =>
   } catch (err) {
     console.log({ err });
   }
-};
-
-// Get detail bonsai when transfer it
-export const getTransferBonsaiID = async (txHash) => {
-  return new Promise(async (resolve, reject) => {
-    await sleep(5000);
-    const txObject = await iconService.getTransactionResult(txHash).execute();
-    if (txObject['status'] === 1) {
-      const data = txObject.eventLogs[0].indexed[3];
-      resolve(data);
-    } else return resolve(false);
-  });
 };

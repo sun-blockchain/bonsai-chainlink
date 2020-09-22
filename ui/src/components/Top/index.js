@@ -18,9 +18,9 @@ function Top() {
   const balanceOxy = useSelector((state) => state.balanceOxy);
   const [openModalBuyOxy, setOpenModalBuyOxy] = useState(false);
 
-  const handleSwitchAccount = () => {
+  const handleSwitchAccount = (address) => {
     dispatch(actions.updateTourStep(100));
-    connectMetamask();
+    if (!address) connectMetamask(true);
   };
 
   return (
@@ -33,7 +33,7 @@ function Top() {
 
       <div className='oxy-num connect-wallet'>
         {address ? <img src={oxyImg} className='oxy-img ' alt='oxy' /> : <></>}
-        <strong className='number' onClick={handleSwitchAccount}>
+        <strong className='number' onClick={() => handleSwitchAccount(address)}>
           {address ? balanceOxy : 'Not connected, click here!'}
         </strong>
 

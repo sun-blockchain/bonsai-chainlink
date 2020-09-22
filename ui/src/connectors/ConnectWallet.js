@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as actions from 'store/actions';
 import { receiveOxygen } from 'helpers';
+import { connectMetamask } from 'connectors';
 
 export const ConnectWallet = () => {
   const address = useSelector((state) => state.walletAddress);
@@ -23,6 +24,12 @@ export const ConnectWallet = () => {
 
     main();
   }, [address, numBonsai, dispatch, instanceOxygen, web3]);
+
+  useEffect(() => {
+    if (window.ethereum._metamask.isEnabled()) {
+      connectMetamask();
+    }
+  }, []);
 
   useEffect(() => {
     // receive Oxygen every interval 30s

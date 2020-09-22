@@ -1,16 +1,30 @@
 import React from 'react';
-import { Row } from 'antd';
+import { Row, message } from 'antd';
 import { packageOxyForSale } from 'constant';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import OxyPackage from 'components/OxyPackage';
-import { buyOxygenWithICX } from 'helpers';
+import { buyOxygen } from 'helpers';
+import * as actions from 'store/actions';
 
 export const BuyOxy = ({ onClose }) => {
+  const dispatch = useDispatch();
   const address = useSelector((state) => state.walletAddress);
-
-  const handleBuyOxy = (item) => {
-    buyOxygenWithICX(address, item.oxy);
+  const instance = useSelector((state) => state.instanceOxygen);
+  const handleBuyOxy = async (item) => {
     onClose();
+    dispatch(actions.setLoading(true));
+    const resultTx = await buyOxygen(instance, address, item.price);
+    dispatch(actions.setLoading(false));
+    if (resultTx) {
+      if (resultTx.status) {
+        message.success({ content: 'Buy Oxygen Successfully !', onClose: 1000 });
+        dispatch(actions.getBalanceOxy());
+      } else {
+        message.error({ content: 'Buy Oxygen Has Failed !', onClose: 1000 });
+      }
+    } else {
+      message.error({ content: 'Buy Oxygen Has Failed !', onClose: 1000 });
+    }
   };
 
   return (
@@ -23,7 +37,7 @@ export const BuyOxy = ({ onClose }) => {
                 key={index}
                 onBuyPlant={() => handleBuyOxy(item)}
                 item={item}
-                unit='ICX'
+                unit='USD'
               />
             );
           })}

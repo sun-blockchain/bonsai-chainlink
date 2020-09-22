@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row } from 'antd';
+import { Row, message } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { PLANT_STATUS } from 'constant';
 import Item from 'components/Item';
@@ -24,15 +24,18 @@ function Store({ onClose }) {
   const instanceOxygen = useSelector((state) => state.instanceOxygen);
 
   const handleBuyPlant = async (item) => {
-    let isSuccess = await transferERC20To(instanceOxygen, address, item.price);
-    if (isSuccess) {
-      if (isSuccess.status) {
+    onClose();
+    dispatch(actions.setLoading(true));
+    let resultTx = await transferERC20To(instanceOxygen, address, item.price);
+    if (resultTx) {
+      if (resultTx.status) {
         dispatch(actions.mintBonsai(address, item));
         dispatch(actions.setFirstPlant(item.index));
+        message.success({ content: 'Buy Bonsai Successfully !', onClose: 2000 });
+      } else {
+        message.error({ content: 'Buy Bonsai Has Failed !', onClose: 2000 });
       }
     }
-
-    onClose();
   };
 
   return (

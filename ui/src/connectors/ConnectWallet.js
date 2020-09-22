@@ -31,6 +31,7 @@ export const ConnectWallet = () => {
         const init = async () => {
           receiveOxygen(web3, instanceOxygen, address, numBonsai);
           dispatch(actions.getBalanceOxy());
+          dispatch(actions.getBalanceBonsai());
         };
         init();
       }

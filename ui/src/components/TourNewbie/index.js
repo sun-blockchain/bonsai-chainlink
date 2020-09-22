@@ -66,11 +66,11 @@ export default function TourNewbie() {
     },
     {
       selector: '.on-shelf',
-      content: `Each bonsai will generate 1 Oxygen every 30 seconds`,
+      content: `Each bonsai will generate 1 Oxygen every 2 minutes`,
     },
     {
       selector: '.buy-oxy',
-      content: `You can buy more oxygen with ICX here`,
+      content: `You can buy more oxygen with ETH, LINK token or DAI token here`,
     },
     {
       selector: '.move-plant',

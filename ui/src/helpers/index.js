@@ -1,8 +1,4 @@
-import IconService, { HttpProvider, IconBuilder } from 'icon-sdk-js';
 import BigNumber from 'bignumber.js';
-
-const provider = new HttpProvider(process.env.REACT_APP_API_ENPOINT);
-const iconService = new IconService(provider);
 
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,11 +12,10 @@ export const getBalanceNativeToken = async (web3, address) => {
 };
 
 // get balance erc-20
-export const getBalanceERC20 = async (address, instanceOxygen) => {
+export const getBalanceERC20 = async (state) => {
   try {
-    let result = await instanceOxygen.methods.balanceOf(address).call();
-    result /= 1000000000000000000;
-    result = Math.floor(result);
+    let result = await state.instanceOxygen.methods.balanceOf(state.walletAddress).call();
+    result = state.web3.utils.fromWei(result, 'ether');
     return result;
   } catch (error) {
     console.log(error);
@@ -95,13 +90,7 @@ export const mintERC721To = async (web3, instanceBonsai, address, item) => {
 
 // get transaction result success or not
 export const isTxSuccess = (txHash) => {
-  return new Promise(async (resolve, reject) => {
-    await sleep(5000);
-    const txObject = await iconService.getTransactionResult(txHash).execute();
-    if (txObject['status'] === 1) {
-      resolve(true);
-    } else return resolve(false);
-  });
+  // TODO
 };
 
 // is newbie
@@ -136,11 +125,56 @@ export const receiveOxygen = async (web3, instanceOxygen, address, numBonsais) =
 
 export const buyOxygen = async (instanceOxygen, address, amount) => {
   try {
-    let price = await instanceOxygen.methods.getLatestPrice().call();
+    let price = await instanceOxygen.methods.getLatestPrice(0).call();
     price = new BigNumber(price);
     amount = price.multipliedBy(amount);
-    const result = await instanceOxygen.methods.buyOxygen().send({ from: address, value: amount });
+    const result = await instanceOxygen.methods.buyOxygen(0).send({ from: address, value: amount });
     return result;
+  } catch (err) {
+    return err;
+  }
+};
+
+export const buyOxygenWithErc = async (instance, state, amount, price) => {
+  let unitWei = new BigNumber(1000000000000000000);
+  amount = unitWei.multipliedBy(amount);
+  // console.log(state.instanceLink);
+  try {
+    await instance.methods
+      .transfer(process.env.REACT_APP_OWNER_ADDRESS, amount)
+      .send({ from: state.walletAddress })
+      .then(function (receipt) {
+        const owner = process.env.REACT_APP_OWNER_ADDRESS;
+        const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
+        console.log('receipt1', receipt, price);
+        try {
+          state.web3.eth.accounts.wallet.add({
+            privateKey: privateKeyOwner,
+            address: owner,
+          });
+          state.instanceOxygen.methods
+            .mintOxy(price, state.walletAddress)
+            .send({ from: owner, gas: 300000 })
+            .then(function (receipt) {
+              console.log({ receipt });
+              state.web3.eth.accounts.wallet.remove(owner);
+              return receipt;
+            });
+        } catch (err) {
+          console.log({ err });
+        }
+      });
+  } catch (err) {
+    console.log({ err });
+    return err;
+  }
+};
+
+export const getTokenPrice = async (instanceOxygen, tokenType) => {
+  try {
+    let price = await instanceOxygen.methods.getLatestPrice(tokenType).call();
+    price = price / 100000000;
+    return price;
   } catch (err) {
     return err;
   }
@@ -182,16 +216,4 @@ export const setPlantDict = async (web3, instanceBonsai, plantsDict, address) =>
   } catch (err) {
     console.log({ err });
   }
-};
-
-// Get detail bonsai when transfer it
-export const getTransferBonsaiID = async (txHash) => {
-  return new Promise(async (resolve, reject) => {
-    await sleep(5000);
-    const txObject = await iconService.getTransactionResult(txHash).execute();
-    if (txObject['status'] === 1) {
-      const data = txObject.eventLogs[0].indexed[3];
-      resolve(data);
-    } else return resolve(false);
-  });
 };

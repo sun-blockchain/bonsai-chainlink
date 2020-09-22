@@ -32,6 +32,22 @@ export const setOxygenInstance = (instanceOxygen) => async (dispatch) => {
   });
 };
 
+export const SET_LINK_INSTANCE = 'SET_LINK_INSTANCE';
+export const setLinkInstance = (instanceLink) => async (dispatch) => {
+  dispatch({
+    type: SET_LINK_INSTANCE,
+    instanceLink,
+  });
+};
+
+export const SET_DAI_INSTANCE = 'SET_DAI_INSTANCE';
+export const setDaiInstance = (instanceDai) => async (dispatch) => {
+  dispatch({
+    type: SET_DAI_INSTANCE,
+    instanceDai,
+  });
+};
+
 export const SET_ADDRESS = 'SET_ADDRESS';
 export const setAddress = (walletAddress) => (dispatch) => {
   dispatch({
@@ -73,9 +89,9 @@ export const getBalanceNative = (address) => async (dispatch, getState) => {
 export const GET_BALANCE_OXY = 'GET_BALANCE_OXY';
 export const getBalanceOxy = () => async (dispatch, getState) => {
   let state = getState();
-  let address = state.walletAddress;
-  const instanceOxygen = state.instanceOxygen;
-  const amount = await getBalanceERC20(address, instanceOxygen);
+  // let address = state.walletAddress;
+  // const instanceOxygen = state.instanceOxygen;
+  const amount = await getBalanceERC20(state);
   dispatch({
     type: GET_BALANCE_OXY,
     balanceOxy: amount,

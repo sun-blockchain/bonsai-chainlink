@@ -1,5 +1,8 @@
 import BigNumber from 'bignumber.js';
 
+const owner = process.env.REACT_APP_OWNER_ADDRESS;
+const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
+
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -12,10 +15,10 @@ export const getBalanceNativeToken = async (web3, address) => {
 };
 
 // get balance erc-20
-export const getBalanceERC20 = async (state) => {
+export const getBalanceERC20 = async (instanceOxygen, walletAddress, web3) => {
   try {
-    let result = await state.instanceOxygen.methods.balanceOf(state.walletAddress).call();
-    result = state.web3.utils.fromWei(result, 'ether');
+    let result = await instanceOxygen.methods.balanceOf(walletAddress).call();
+    result = web3.utils.fromWei(result, 'ether');
     return result;
   } catch (error) {
     console.log(error);
@@ -34,23 +37,27 @@ export const getBalanceERC721 = async (address, instanceBonsai) => {
 
 // airdrop 3000 oxygen for first-time users play
 export const airDropERC20 = async (web3, instanceOxygen, address) => {
-  const owner = process.env.REACT_APP_OWNER_ADDRESS;
-  const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
-  try {
-    web3.eth.accounts.wallet.add({
-      privateKey: privateKeyOwner,
-      address: owner,
-    });
-    instanceOxygen.methods
-      .airDrop(address)
-      .send({ from: owner, gas: 300000 })
-      .then(function (receipt) {
-        web3.eth.accounts.wallet.remove(owner);
-        return receipt;
+  return new Promise(async (resolve) => {
+    const owner = process.env.REACT_APP_OWNER_ADDRESS;
+    const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
+    try {
+      web3.eth.accounts.wallet.add({
+        privateKey: privateKeyOwner,
+        address: owner,
       });
-  } catch (err) {
-    console.log({ err });
-  }
+      instanceOxygen.methods
+        .airDrop(address)
+        .send({ from: owner, gas: 300000 })
+        .then(function (receipt) {
+          web3.eth.accounts.wallet.remove(owner);
+          resolve(true);
+          return receipt;
+        });
+    } catch (err) {
+      console.log({ err });
+      resolve(false);
+    }
+  });
 };
 
 // transfer oxy to buy bonsai
@@ -68,24 +75,26 @@ export const transferERC20To = async (instanceOxygen, address, amount) => {
 
 // mint bonsai after transfer oxy successfully
 export const mintERC721To = async (web3, instanceBonsai, address, item) => {
-  const owner = process.env.REACT_APP_OWNER_ADDRESS;
-  const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
-  try {
-    web3.eth.accounts.wallet.add({
-      privateKey: privateKeyOwner,
-      address: owner,
-    });
-
-    instanceBonsai.methods
-      .mint(address, item.name, item.price)
-      .send({ from: owner, gas: 300000 })
-      .then(function (receipt) {
-        web3.eth.accounts.wallet.remove(owner);
-        return receipt;
+  return new Promise(async (resolve) => {
+    try {
+      web3.eth.accounts.wallet.add({
+        privateKey: privateKeyOwner,
+        address: owner,
       });
-  } catch (err) {
-    console.log({ err });
-  }
+
+      instanceBonsai.methods
+        .mint(address, item.name, item.price)
+        .send({ from: owner, gas: 300000 })
+        .then(function (receipt) {
+          web3.eth.accounts.wallet.remove(owner);
+          resolve(true);
+          return receipt;
+        });
+    } catch (err) {
+      console.log({ err });
+      resolve(false);
+    }
+  });
 };
 
 // is newbie
@@ -99,23 +108,25 @@ export const airDropped = async (address, instanceOxygen) => {
 };
 
 export const receiveOxygen = async (web3, instanceOxygen, address, numBonsais) => {
-  const owner = process.env.REACT_APP_OWNER_ADDRESS;
-  const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
-  try {
-    web3.eth.accounts.wallet.add({
-      privateKey: privateKeyOwner,
-      address: owner,
-    });
-    instanceOxygen.methods
-      .receiveOxygen(address, numBonsais)
-      .send({ from: owner, gas: 600000 })
-      .then(function (receipt) {
-        web3.eth.accounts.wallet.remove(owner);
-        return receipt;
+  return new Promise(async (resolve) => {
+    try {
+      web3.eth.accounts.wallet.add({
+        privateKey: privateKeyOwner,
+        address: owner,
       });
-  } catch (err) {
-    console.log({ err });
-  }
+      instanceOxygen.methods
+        .receiveOxygen(address, numBonsais)
+        .send({ from: owner, gas: 600000 })
+        .then(function (receipt) {
+          web3.eth.accounts.wallet.remove(owner);
+          resolve(true);
+          return receipt;
+        });
+    } catch (err) {
+      console.log({ err });
+      resolve(false);
+    }
+  });
 };
 
 export const buyOxygen = async (instanceOxygen, address, amount) => {

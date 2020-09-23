@@ -72,9 +72,8 @@ export const getBalanceNative = (address) => async (dispatch, getState) => {
 
 export const GET_BALANCE_OXY = 'GET_BALANCE_OXY';
 export const getBalanceOxy = () => async (dispatch, getState) => {
-  let state = getState();
-
-  const amount = await getBalanceERC20(state);
+  const { web3, instanceOxygen, walletAddress } = getState();
+  const amount = await getBalanceERC20(instanceOxygen, walletAddress, web3);
   dispatch({
     type: GET_BALANCE_OXY,
     balanceOxy: amount,
@@ -145,13 +144,7 @@ export const setFirstPlant = (firstPlant) => (dispatch) => {
 
 export const transferPlantLocation = (secondPlant) => async (dispatch, getState) => {
   let state = getState();
-
-  let firstPlant = state.firstPlant;
-  let plantsDict = state.plantsDict;
-  let plants = state.plants;
-  let address = state.walletAddress;
-  let web3 = state.web3;
-  let instanceBonsai = state.instanceBonsai;
+  let { firstPlant, plantsDict, plants, walletAddress, web3, instanceBonsai } = state;
 
   // transfer in empty array
   let temp = plants[firstPlant];
@@ -172,7 +165,7 @@ export const transferPlantLocation = (secondPlant) => async (dispatch, getState)
 
   // update index
   plantsDict.map((plant, index) => (plant.index = index));
-  await setPlantDict(web3, instanceBonsai, plantsDict, address);
+  await setPlantDict(web3, instanceBonsai, plantsDict, walletAddress);
 
   dispatch({
     type: SET_PLANTS_DICT,
@@ -181,12 +174,15 @@ export const transferPlantLocation = (secondPlant) => async (dispatch, getState)
 };
 
 export const mintBonsai = (address, bonsai) => async (dispatch, getState) => {
-  let state = getState();
-  let web3 = state.web3;
-  const instanceBonsai = state.instanceBonsai;
-  await mintERC721To(web3, instanceBonsai, address, bonsai);
-
+  let { web3, instanceBonsai } = getState();
+  const success = await mintERC721To(web3, instanceBonsai, address, bonsai);
   dispatch(setLoading(false));
+  if (success) {
+    dispatch(getBalanceBonsai());
+    dispatch(getBalanceOxy());
+  } else {
+    //refund money
+  }
 };
 
 export const SET_LOADING = 'SET_LOADING';

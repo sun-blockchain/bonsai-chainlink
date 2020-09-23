@@ -37,7 +37,6 @@ export const connectMetamask = async () => {
       const instanceOxygen = new web3.eth.Contract(Oxygen.abi, addressOxygen);
       store.dispatch(setBonsaiInstance(instanceBonsai));
       store.dispatch(setOxygenInstance(instanceOxygen));
-
       connect();
     }
   }

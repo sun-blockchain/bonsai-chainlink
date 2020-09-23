@@ -17,13 +17,11 @@ export const ConnectWallet = () => {
       if (address) {
         dispatch(actions.getBalanceOxy());
         dispatch(actions.getBalanceBonsai());
-        // request receive Oxygen
-        receiveOxygen(web3, instanceOxygen, address, numBonsai);
       }
     };
 
     main();
-  }, [address, numBonsai, dispatch, instanceOxygen, web3]);
+  }, [address, dispatch]);
 
   useEffect(() => {
     if (window.ethereum._metamask.isEnabled()) {
@@ -32,18 +30,17 @@ export const ConnectWallet = () => {
   }, []);
 
   useEffect(() => {
-    // receive Oxygen every interval 30s
-    let interval = setInterval(() => {
+    const receive = async () => {
       if (address && numBonsai > 0) {
-        const init = async () => {
-          receiveOxygen(web3, instanceOxygen, address, numBonsai);
-          dispatch(actions.getBalanceOxy());
-          dispatch(actions.getBalanceBonsai());
-        };
-        init();
+        await receiveOxygen(web3, instanceOxygen, address, numBonsai);
+        dispatch(actions.getBalanceOxy());
       }
-      dispatch(actions.getBalanceNative(address));
-    }, 30000);
+    };
+
+    receive(); //receive Oxygen at first time
+    let interval = setInterval(() => {
+      receive(); // receive Oxygen every interval 60s
+    }, 60000);
     return () => clearInterval(interval);
   }, [address, dispatch, numBonsai, instanceOxygen, web3]);
 

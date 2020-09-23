@@ -2,11 +2,9 @@ import * as connect from './actions';
 
 const initialState = {
   web3: null,
-  account: null,
   purses: [],
   plantsDict: [], // Empty array
   plants: [], // Fill bonsai in empty array to display
-  test: [],
   walletAddress: null,
   balanceNative: null,
   balanceOxy: null,
@@ -80,6 +78,16 @@ const rootReducer = (state = initialState, action) => {
       return {
         ...state,
         instanceOxygen: action.instanceOxygen,
+      };
+    case connect.SET_LINK_INSTANCE:
+      return {
+        ...state,
+        instanceLink: action.instanceLink,
+      };
+    case connect.SET_DAI_INSTANCE:
+      return {
+        ...state,
+        instanceDai: action.instanceDai,
       };
     default:
       return state;

@@ -45,6 +45,7 @@ export default function AirDrop() {
             OK
           </Button>,
         ]}
+        onCancel={() => handleOk(false)}
       >
         <div className='ant-modal-confirm-body'>
           <CheckCircleTwoTone twoToneColor='#52c41a' />

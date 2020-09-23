@@ -5,7 +5,13 @@
 import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
 import store from 'store';
-import { setWeb3, setAddress, setBonsaiInstance, setOxygenInstance } from 'store/actions';
+import {
+  setWeb3,
+  setAddress,
+  setBonsaiInstance,
+  setOxygenInstance,
+  setPreviousNonce,
+} from 'store/actions';
 
 import Bonsai from 'contracts/Bonsai.json';
 import Oxygen from 'contracts/Oxygen.json';
@@ -37,6 +43,7 @@ export const connectMetamask = async () => {
       const instanceOxygen = new web3.eth.Contract(Oxygen.abi, addressOxygen);
       store.dispatch(setBonsaiInstance(instanceBonsai));
       store.dispatch(setOxygenInstance(instanceOxygen));
+      store.dispatch(setPreviousNonce());
 
       connect();
     }

@@ -16,6 +16,7 @@ const initialState = {
   loading: false,
   instanceBonsai: null,
   instanceOxygen: null,
+  previousNonce: 0,
 };
 
 const rootReducer = (state = initialState, action) => {
@@ -80,6 +81,11 @@ const rootReducer = (state = initialState, action) => {
       return {
         ...state,
         instanceOxygen: action.instanceOxygen,
+      };
+    case connect.SET_PREVIOUS_NONCE:
+      return {
+        ...state,
+        previousNonce: action.previousNonce,
       };
     default:
       return state;

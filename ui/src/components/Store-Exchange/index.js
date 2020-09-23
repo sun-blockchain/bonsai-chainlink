@@ -32,8 +32,10 @@ function Store({ onClose }) {
         dispatch(actions.mintBonsai(address, item));
         dispatch(actions.setFirstPlant(item.index));
         message.success({ content: 'Buy Bonsai Successfully !', onClose: 2000 });
+        dispatch(actions.getBalanceOxy());
       } else {
         message.error({ content: 'Buy Bonsai Has Failed !', onClose: 2000 });
+        dispatch(actions.setLoading(false));
       }
     }
   };

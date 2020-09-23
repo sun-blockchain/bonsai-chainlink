@@ -5,6 +5,7 @@ import {
   mintERC721To,
   getPlantDict,
   setPlantDict,
+  receiveOxygen,
 } from 'helpers';
 import { PLANT_STATUS, plantsInitDic } from 'constant';
 
@@ -72,9 +73,9 @@ export const getBalanceNative = (address) => async (dispatch, getState) => {
 
 export const GET_BALANCE_OXY = 'GET_BALANCE_OXY';
 export const getBalanceOxy = () => async (dispatch, getState) => {
-  let state = getState();
-
-  const amount = await getBalanceERC20(state);
+  const { web3, instanceOxygen, walletAddress } = getState();
+  const amount = await getBalanceERC20(instanceOxygen, walletAddress, web3);
+  console.log({ amount });
   dispatch({
     type: GET_BALANCE_OXY,
     balanceOxy: amount,
@@ -181,12 +182,14 @@ export const transferPlantLocation = (secondPlant) => async (dispatch, getState)
 };
 
 export const mintBonsai = (address, bonsai) => async (dispatch, getState) => {
-  let state = getState();
-  let web3 = state.web3;
-  const instanceBonsai = state.instanceBonsai;
-  await mintERC721To(web3, instanceBonsai, address, bonsai);
-
+  let { web3, previousNonce, instanceBonsai } = getState();
+  dispatch(setPreviousNonce(previousNonce + 1));
+  console.log({ previousNonce });
+  const t = await mintERC721To(previousNonce + 1, web3, instanceBonsai, address, bonsai);
   dispatch(setLoading(false));
+  if (t) {
+    dispatch(getBalanceBonsai());
+  }
 };
 
 export const SET_LOADING = 'SET_LOADING';
@@ -194,5 +197,26 @@ export const setLoading = (loading) => (dispatch) => {
   dispatch({
     type: SET_LOADING,
     loading,
+  });
+};
+
+export const receiveOxy = () => async (dispatch, getState) => {
+  const { web3, instanceOxygen, walletAddress, balanceBonsai, previousNonce } = getState();
+  dispatch(setPreviousNonce(previousNonce + 1));
+  debugger;
+  await receiveOxygen(previousNonce + 1, web3, instanceOxygen, walletAddress, balanceBonsai.length);
+  dispatch(getBalanceOxy());
+};
+
+export const SET_PREVIOUS_NONCE = 'SET_PREVIOUS_NONCE';
+export const setPreviousNonce = (nonce) => async (dispatch, getState) => {
+  const { web3 } = getState();
+  let previousNonce = nonce
+    ? nonce
+    : (await web3.eth.getTransactionCount(process.env.REACT_APP_OWNER_ADDRESS)) - 1;
+
+  dispatch({
+    type: SET_PREVIOUS_NONCE,
+    previousNonce,
   });
 };

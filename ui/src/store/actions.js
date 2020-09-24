@@ -6,6 +6,7 @@ import {
   mintERC721To,
   getPlantDict,
   setPlantDict,
+  buyOxygenWithERC20,
 } from 'helpers';
 import { PLANT_STATUS, plantsInitDic } from 'constant';
 
@@ -30,6 +31,22 @@ export const setOxygenInstance = (instanceOxygen) => async (dispatch) => {
   dispatch({
     type: SET_OXYGEN_INSTANCE,
     instanceOxygen,
+  });
+};
+
+export const SET_LINK_INSTANCE = 'SET_LINK_INSTANCE';
+export const setLinkInstance = (instanceLink) => async (dispatch) => {
+  dispatch({
+    type: SET_LINK_INSTANCE,
+    instanceLink,
+  });
+};
+
+export const SET_DAI_INSTANCE = 'SET_DAI_INSTANCE';
+export const setDaiInstance = (instanceDai) => async (dispatch) => {
+  dispatch({
+    type: SET_DAI_INSTANCE,
+    instanceDai,
   });
 };
 
@@ -196,4 +213,10 @@ export const setLoading = (loading) => (dispatch) => {
     type: SET_LOADING,
     loading,
   });
+};
+
+export const buyOxygenERC = (tokenType, tokenPrice, price) => async (dispatch, getState) => {
+  let state = getState();
+  await buyOxygenWithERC20(state, tokenType, tokenPrice, price);
+  dispatch(getBalanceOxy());
 };

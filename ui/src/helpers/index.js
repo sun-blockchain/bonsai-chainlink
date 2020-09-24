@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import Oxygen from 'contracts/Oxygen.json';
 
 const owner = process.env.REACT_APP_OWNER_ADDRESS;
 const privateKeyOwner = process.env.REACT_APP_OWNER_PRIVATE_KEY;
@@ -153,9 +154,59 @@ export const receiveOxygen = async (web3, instanceOxygen, address, numBonsais) =
   });
 };
 
+export const getTokenPrice = async (instanceOxygen, tokenType) => {
+  try {
+    let price = await instanceOxygen.methods.getLatestPrice(tokenType).call();
+    price = price / 100000000;
+    return price;
+  } catch (err) {
+    return err;
+  }
+};
+
+export const approveContract = async (state, tokenType, amount) => {
+  const addressOxygen = Oxygen.networks[process.env.REACT_APP_NETWORK_ID].address;
+  amount = state.web3.utils.toWei(amount.toString(), 'ether');
+  try {
+    if (tokenType === 1) {
+      // Link
+      let isSuccess = await state.instanceLink.methods
+        .approve(addressOxygen, amount)
+        .send({ from: state.walletAddress });
+      if (!!isSuccess) return true;
+      else return false;
+    } else {
+      // tokenType === 2 => DAI
+      let isSuccess = await state.instanceDai.methods
+        .approve(addressOxygen, amount)
+        .send({ from: state.walletAddress });
+      if (!!isSuccess) return true;
+      else return false;
+    }
+  } catch (error) {
+    console.log({ error });
+    return false;
+  }
+};
+
+export const buyOxygenWithERC20 = async (state, tokenType, amount, price) => {
+  // price is convert to $ live 1$ ,5$ ,10$
+  // amount is number of token
+  amount = state.web3.utils.toWei(amount.toString(), 'ether');
+
+  try {
+    await state.instanceOxygen.methods
+      .buyOxygenWithERC20(tokenType, amount, price)
+      .send({ from: state.walletAddress });
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
 export const buyOxygen = async (instanceOxygen, address, amount) => {
   try {
-    let price = await instanceOxygen.methods.getLatestPrice().call();
+    let price = (await instanceOxygen.methods.getLatestPrice(0).call()) + '00000';
+
     price = new BigNumber(price);
     amount = price.multipliedBy(amount);
     const result = await instanceOxygen.methods.buyOxygen().send({ from: address, value: amount });

@@ -5,13 +5,23 @@
 import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
 import store from 'store';
-import { setWeb3, setAddress, setBonsaiInstance, setOxygenInstance } from 'store/actions';
+import {
+  setWeb3,
+  setAddress,
+  setBonsaiInstance,
+  setOxygenInstance,
+  setLinkInstance,
+  setDaiInstance,
+} from 'store/actions';
 
 import Bonsai from 'contracts/Bonsai.json';
 import Oxygen from 'contracts/Oxygen.json';
+import Erc20 from 'contracts/ERC20.json';
 
 const addressBonsai = Bonsai.networks[process.env.REACT_APP_NETWORK_ID].address;
 const addressOxygen = Oxygen.networks[process.env.REACT_APP_NETWORK_ID].address;
+const addressLink = process.env.REACT_APP_LINK_CONTRACT_ADDRESS;
+const addressDai = process.env.REACT_APP_DAI_CONTRACT_ADDRESS;
 
 // this returns the provider, or null if it wasn't detected
 export const connectMetamask = async () => {
@@ -35,8 +45,14 @@ export const connectMetamask = async () => {
       store.dispatch(setWeb3(web3));
       const instanceBonsai = new web3.eth.Contract(Bonsai.abi, addressBonsai);
       const instanceOxygen = new web3.eth.Contract(Oxygen.abi, addressOxygen);
+      const instanceLink = new web3.eth.Contract(Erc20.abi, addressLink);
+      const instanceDai = new web3.eth.Contract(Erc20.abi, addressDai);
+
       store.dispatch(setBonsaiInstance(instanceBonsai));
       store.dispatch(setOxygenInstance(instanceOxygen));
+      store.dispatch(setLinkInstance(instanceLink));
+      store.dispatch(setDaiInstance(instanceDai));
+
       connect();
     }
   }

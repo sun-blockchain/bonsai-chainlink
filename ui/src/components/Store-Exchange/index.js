@@ -36,6 +36,7 @@ function Store({ onClose }) {
         message.error({ content: 'Buy Bonsai Has Failed !', onClose: 2000 });
       }
     }
+    dispatch(actions.setLoading(false));
   };
 
   return (
